@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanapol's Slot Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .player-name {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.5)); }
+            to { filter: drop-shadow(0 0 20px rgba(254, 202, 87, 0.8)); }
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .game-title {
+            color: #fff;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slot-machine {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .reels-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .reel {
+            width: 100px;
+            height: 120px;
+            background: #fff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border: 3px solid #f39c12;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reel.spinning {
+            animation: spin 0.1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-20px); }
+        }
+
+        .reel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+            transform: translateX(-100%);
+        }
+
+        .reel:hover::before {
+            animation: shine 1s ease-in-out;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .spin-button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(231, 76, 60, 0.6);
+        }
+
+        .spin-button:active {
+            transform: translateY(0);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .info-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .result {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 20px;
+            min-height: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .win {
+            color: #2ecc71;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .jackpot {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            animation: jackpot 1s ease-in-out infinite;
+        }
+
+        @keyframes jackpot {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-1deg); }
+            75% { transform: scale(1.1) rotate(1deg); }
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #f39c12;
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10%, 90% { opacity: 1; }
+            50% { transform: translateY(-10vh) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-name">Thanapol</div>
+    
+    <div class="particles" id="particles"></div>
+
+    <div class="game-container">
+        <h1 class="game-title">🎰 SLOT MACHINE 🎰</h1>
+        
+        <div class="slot-machine">
+            <div class="reels-container">
+                <div class="reel" id="reel1">🍎</div>
+                <div class="reel" id="reel2">🍌</div>
+                <div class="reel" id="reel3">🍒</div>
+            </div>
+            
+            <div class="controls">
+                <button class="spin-button" id="spinBtn" onclick="spin()">
+                    SPIN
+                </button>
+                
+                <div class="game-info">
+                    <div class="info-item">
+                        💰 Credits: <span id="credits">100</span>
+                    </div>
+                    <div class="info-item">
+                        🎯 Bet: <span id="bet">10</span>
+                    </div>
+                    <div class="info-item">
+                        🏆 Wins: <span id="wins">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const symbols = ['🍎', '🍌', '🍒', '🍊', '🍇', '💎', '⭐', '🔔'];
+        let credits = 100;
+        let bet = 10;
+        let wins = 0;
+        let isSpinning = false;
+
+        function updateDisplay() {
+            document.getElementById('credits').textContent = credits;
+            document.getElementById('bet').textContent = bet;
+            document.getElementById('wins').textContent = wins;
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function getRandomSymbol() {
+            return symbols[Math.floor(Math.random() * symbols.length)];
+        }
+
+        function spin() {
+            if (isSpinning || credits < bet) {
+                return;
+            }
+
+            isSpinning = true;
+            credits -= bet;
+            updateDisplay();
+
+            const spinBtn = document.getElementById('spinBtn');
+            const resultDiv = document.getElementById('result');
+            const reels = [
+                document.getElementById('reel1'),
+                document.getElementById('reel2'),
+                document.getElementById('reel3')
+            ];
+
+            spinBtn.disabled = true;
+            spinBtn.textContent = 'SPINNING...';
+            resultDiv.textContent = '';
+            resultDiv.className = 'result';
+
+            // Add spinning animation
+            reels.forEach(reel => {
+                reel.classList.add('spinning');
+            });
+
+            // Spin animation
+            const spinDuration = 2000;
+            const spinInterval = setInterval(() => {
+                reels.forEach(reel => {
+                    reel.textContent = getRandomSymbol();
+                });
+            }, 50);
+
+            setTimeout(() => {
+                clearInterval(spinInterval);
+                
+                // Final results
+                const finalSymbols = [getRandomSymbol(), getRandomSymbol(), getRandomSymbol()];
+                reels.forEach((reel, index) => {
+                    reel.textContent = finalSymbols[index];
+                    reel.classList.remove('spinning');
+                });
+
+                // Check for wins
+                let winAmount = 0;
+                let message = '';
+
+                if (finalSymbols[0] === finalSymbols[1] && finalSymbols[1] === finalSymbols[2]) {
+                    // Three of a kind
+                    if (finalSymbols[0] === '💎') {
+                        winAmount = bet * 50;
+                        message = '💎 JACKPOT! 💎';
+                        resultDiv.className = 'result jackpot';
+                    } else if (finalSymbols[0] === '⭐') {
+                        winAmount = bet * 20;
+                        message = '⭐ BIG WIN! ⭐';
+                        resultDiv.className = 'result win';
+                    } else {
+                        winAmount = bet * 10;
+                        message = '🎉 THREE OF A KIND! 🎉';
+                        resultDiv.className = 'result win';
+                    }
+                } else if (finalSymbols[0] === finalSymbols[1] || 
+                          finalSymbols[1] === finalSymbols[2] || 
+                          finalSymbols[0] === finalSymbols[2]) {
+                    // Two of a kind
+                    winAmount = bet * 2;
+                    message = '✨ TWO OF A KIND! ✨';
+                    resultDiv.className = 'result win';
+                } else {
+                    message = 'Try again! 🎲';
+                    resultDiv.className = 'result';
+                }
+
+                if (winAmount > 0) {
+                    credits += winAmount;
+                    wins++;
+                    updateDisplay();
+                }
+
+                resultDiv.textContent = message;
+
+                // Re-enable spin button
+                spinBtn.disabled = false;
+                spinBtn.textContent = credits >= bet ? 'SPIN' : 'NO CREDITS';
+                isSpinning = false;
+
+            }, spinDuration);
+        }
+
+        // Initialize particles
+        createParticles();
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                spin();
+            }
+        });
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
