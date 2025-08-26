@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ing - เกมร้านอาหาร</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-title {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 48px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            height: 100vh;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .main-area {
+            display: grid;
+            grid-template-rows: 150px 1fr 120px;
+            gap: 15px;
+        }
+
+        .stats-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.37);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .cooking-area {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.37);
+            position: relative;
+        }
+
+        .kitchen-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            height: 100%;
+        }
+
+        .cooking-station {
+            background: #f8f9fa;
+            border: 3px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .cooking-station:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .cooking-station.active {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .station-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .station-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .cooking-timer {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .orders-panel {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.37);
+        }
+
+        .orders-title {
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .orders-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .order-item {
+            background: #fff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ffd93d;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .order-item:hover {
+            transform: translateX(5px);
+        }
+
+        .order-item.urgent {
+            border-left-color: #ff4757;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .order-dish {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .order-time {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .order-price {
+            font-size: 14px;
+            color: #28a745;
+            font-weight: bold;
+            float: right;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menu-panel {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.37);
+            flex: 1;
+        }
+
+        .menu-title {
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .menu-item {
+            background: #fff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .menu-item:hover {
+            border-color: #6c5ce7;
+            transform: scale(1.02);
+        }
+
+        .dish-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .dish-ingredients {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .dish-price {
+            color: #28a745;
+            font-weight: bold;
+            float: right;
+        }
+
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .ingredients-panel {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.37);
+        }
+
+        .ingredients-title {
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .ingredient-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #fff;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .ingredient-count {
+            background: #6c5ce7;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-title">Ing</div>
+    
+    <div class="game-container">
+        <div class="main-area">
+            <!-- แผงสถิติ -->
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-label">เงิน</div>
+                    <div class="stat-value" id="money">500฿</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">คะแนน</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">ออเดอร์สำเร็จ</div>
+                    <div class="stat-value" id="completed">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">เวลา</div>
+                    <div class="stat-value" id="time">05:00</div>
+                </div>
+            </div>
+
+            <!-- พื้นที่ทำอาหาร -->
+            <div class="cooking-area">
+                <div class="kitchen-grid">
+                    <div class="cooking-station" data-station="prep" onclick="useStation('prep')">
+                        <div class="station-icon">🔪</div>
+                        <div class="station-name">เตรียมวัตถุดิบ</div>
+                        <div class="cooking-timer" id="prep-timer" style="display: none;"></div>
+                    </div>
+                    <div class="cooking-station" data-station="stove" onclick="useStation('stove')">
+                        <div class="station-icon">🔥</div>
+                        <div class="station-name">เตาทำอาหาร</div>
+                        <div class="cooking-timer" id="stove-timer" style="display: none;"></div>
+                    </div>
+                    <div class="cooking-station" data-station="grill" onclick="useStation('grill')">
+                        <div class="station-icon">🍖</div>
+                        <div class="station-name">เตาย่าง</div>
+                        <div class="cooking-timer" id="grill-timer" style="display: none;"></div>
+                    </div>
+                    <div class="cooking-station" data-station="fryer" onclick="useStation('fryer')">
+                        <div class="station-icon">🍟</div>
+                        <div class="station-name">เครื่องทอด</div>
+                        <div class="cooking-timer" id="fryer-timer" style="display: none;"></div>
+                    </div>
+                    <div class="cooking-station" data-station="drink" onclick="useStation('drink')">
+                        <div class="station-icon">🥤</div>
+                        <div class="station-name">เตรียมเครื่องดื่ม</div>
+                        <div class="cooking-timer" id="drink-timer" style="display: none;"></div>
+                    </div>
+                    <div class="cooking-station" data-station="serve" onclick="useStation('serve')">
+                        <div class="station-icon">🍽️</div>
+                        <div class="station-name">เสิร์ฟอาหาร</div>
+                        <div class="cooking-timer" id="serve-timer" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- แผงออเดอร์ -->
+            <div class="orders-panel">
+                <div class="orders-title">รายการออเดอร์</div>
+                <div class="orders-list" id="orders-list">
+                    <!-- ออเดอร์จะปรากฏที่นี่ -->
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <!-- แผงเมนู -->
+            <div class="menu-panel">
+                <div class="menu-title">เมนูอาหาร</div>
+                <div id="menu-list">
+                    <div class="menu-item" onclick="selectDish('padthai')">
+                        <div class="dish-name">ผัดไทย</div>
+                        <div class="dish-price">60฿</div>
+                        <div class="dish-ingredients">เส้นผัดไทย, กุ้ง, ไข่, ถั่วงอก</div>
+                    </div>
+                    <div class="menu-item" onclick="selectDish('somtam')">
+                        <div class="dish-name">ส้มตำ</div>
+                        <div class="dish-price">40฿</div>
+                        <div class="dish-ingredients">มะละกอ, พริก, มะนาว, น้ำปลา</div>
+                    </div>
+                    <div class="menu-item" onclick="selectDish('tomyum')">
+                        <div class="dish-name">ต้มยำกุ้ง</div>
+                        <div class="dish-price">80฿</div>
+                        <div class="dish-ingredients">กุ้ง, เห็ด, พริก, มะนาว, น้ำซุป</div>
+                    </div>
+                    <div class="menu-item" onclick="selectDish('mango')">
+                        <div class="dish-name">ข้าวเหนียวมะม่วง</div>
+                        <div class="dish-price">50฿</div>
+                        <div class="dish-ingredients">ข้าวเหนียว, มะม่วง, กะทิ</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- แผงวัตถุดิบ -->
+            <div class="ingredients-panel">
+                <div class="ingredients-title">วัตถุดิบ</div>
+                <div id="ingredients-list">
+                    <div class="ingredient-item">
+                        <span>กุ้ง</span>
+                        <span class="ingredient-count" id="shrimp-count">10</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span>เส้นผัดไทย</span>
+                        <span class="ingredient-count" id="noodles-count">15</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span>มะละกอ</span>
+                        <span class="ingredient-count" id="papaya-count">8</span>
+                    </div>
+                    <div class="ingredient-item">
+                        <span>เห็ด</span>
+                        <span class="ingredient-count" id="mushroom-count">12</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // สถานะเกม
+        let gameState = {
+            money: 500,
+            score: 0,
+            completedOrders: 0,
+            time: 300, // 5 นาที
+            selectedDish: null,
+            currentOrders: [],
+            ingredients: {
+                shrimp: 10,
+                noodles: 15,
+                papaya: 8,
+                mushroom: 12,
+                egg: 20,
+                coconut: 10
+            },
+            cookingStations: {},
+            gameRunning: true
+        };
+
+        // สูตรอาหาร
+        const recipes = {
+            padthai: {
+                name: 'ผัดไทย',
+                price: 60,
+                ingredients: ['noodles', 'shrimp', 'egg'],
+                cookTime: 8,
+                stations: ['prep', 'stove', 'serve']
+            },
+            somtam: {
+                name: 'ส้มตำ',
+                price: 40,
+                ingredients: ['papaya'],
+                cookTime: 5,
+                stations: ['prep', 'serve']
+            },
+            tomyum: {
+                name: 'ต้มยำกุ้ง',
+                price: 80,
+                ingredients: ['shrimp', 'mushroom'],
+                cookTime: 10,
+                stations: ['prep', 'stove', 'serve']
+            },
+            mango: {
+                name: 'ข้าวเหนียวมะม่วง',
+                price: 50,
+                ingredients: ['coconut'],
+                cookTime: 3,
+                stations: ['prep', 'serve']
+            }
+        };
+
+        // เริ่มเกม
+        function startGame() {
+            updateDisplay();
+            generateOrder();
+            startTimer();
+            
+            // สร้างออเดอร์ทุก 10-20 วินาที
+            setInterval(() => {
+                if (gameState.gameRunning && Math.random() < 0.6) {
+                    generateOrder();
+                }
+            }, 15000);
+        }
+
+        // สร้างออเดอร์ใหม่
+        function generateOrder() {
+            if (gameState.currentOrders.length >= 3) return;
+
+            const dishes = Object.keys(recipes);
+            const dishKey = dishes[Math.floor(Math.random() * dishes.length)];
+            const dish = recipes[dishKey];
+            
+            const order = {
+                id: Date.now(),
+                dish: dishKey,
+                name: dish.name,
+                price: dish.price,
+                timeLeft: 60 + Math.random() * 60, // 60-120 วินาที
+                maxTime: 60 + Math.random() * 60
+            };
+
+            gameState.currentOrders.push(order);
+            updateOrdersDisplay();
+        }
+
+        // เลือกอาหาร
+        function selectDish(dishKey) {
+            gameState.selectedDish = dishKey;
+            showNotification(`เลือก ${recipes[dishKey].name} แล้ว`);
+            
+            // เน้นเมนูที่เลือก
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.style.borderColor = 'transparent';
+            });
+            event.target.closest('.menu-item').style.borderColor = '#6c5ce7';
+        }
+
+        // ใช้สถานีทำอาหาร
+        function useStation(stationName) {
+            if (!gameState.selectedDish) {
+                showNotification('กรุณาเลือกเมนูก่อน!');
+                return;
+            }
+
+            const recipe = recipes[gameState.selectedDish];
+            
+            // ตรวจสอบว่าสถานีนี้ใช้ได้กับเมนูที่เลือกหรือไม่
+            if (!recipe.stations.includes(stationName)) {
+                showNotification('สถานีนี้ไม่เหมาะกับเมนูที่เลือก');
+                return;
+            }
+
+            // ตรวจสอบว่าสถานีว่างหรือไม่
+            if (gameState.cookingStations[stationName]) {
+                showNotification('สถานีกำลังใช้งานอยู่');
+                return;
+            }
+
+            // ตรวจสอบวัตถุดิบ
+            let hasIngredients = true;
+            recipe.ingredients.forEach(ingredient => {
+                if (gameState.ingredients[ingredient] <= 0) {
+                    hasIngredients = false;
+                }
+            });
+
+            if (!hasIngredients) {
+                showNotification('วัตถุดิบไม่เพียงพอ');
+                return;
+            }
+
+            // เริ่มการทำอาหาร
+            startCooking(stationName, recipe);
+        }
+
+        // เริ่มการทำอาหาร
+        function startCooking(stationName, recipe) {
+            const station = document.querySelector(`[data-station="${stationName}"]`);
+            const timer = document.getElementById(`${stationName}-timer`);
+            
+            station.classList.add('active');
+            timer.style.display = 'flex';
+            
+            let timeLeft = recipe.cookTime;
+            timer.textContent = timeLeft;
+            
+            gameState.cookingStations[stationName] = {
+                dish: gameState.selectedDish,
+                timeLeft: timeLeft
+            };
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                timer.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    finishCooking(stationName, recipe);
+                }
+            }, 1000);
+        }
+
+        // เสร็จสิ้นการทำอาหาร
+        function finishCooking(stationName, recipe) {
+            const station = document.querySelector(`[data-station="${stationName}"]`);
+            const timer = document.getElementById(`${stationName}-timer`);
+            
+            station.classList.remove('active');
+            timer.style.display = 'none';
+            delete gameState.cookingStations[stationName];
+
+            if (stationName === 'serve') {
+                // เสิร์ฟอาหารเสร็จแล้ว
+                completeOrder(gameState.selectedDish);
+                gameState.selectedDish = null;
+                
+                // ยกเลิกการเลือกเมนู
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.style.borderColor = 'transparent';
+                });
+            }
+
+            showNotification(`${stationName.toUpperCase()} เสร็จแล้ว!`);
+        }
+
+        // เสร็จสิ้นออเดอร์
+        function completeOrder(dishKey) {
+            const orderIndex = gameState.currentOrders.findIndex(order => order.dish === dishKey);
+            
+            if (orderIndex !== -1) {
+                const order = gameState.currentOrders[orderIndex];
+                const recipe = recipes[dishKey];
+                
+                // หักวัตถุดิบ
+                recipe.ingredients.forEach(ingredient => {
+                    gameState.ingredients[ingredient]--;
+                });
+                
+                // เพิ่มเงินและคะแนน
+                gameState.money += order.price;
+                gameState.score += Math.floor(order.price * (order.timeLeft / order.maxTime));
+                gameState.completedOrders++;
+                
+                // ลบออเดอร์
+                gameState.currentOrders.splice(orderIndex, 1);
+                
+                showNotification(`+${order.price}฿ เสิร์ฟ ${recipe.name} สำเร็จ!`);
+                updateDisplay();
+                updateOrdersDisplay();
+            }
+        }
+
+        // อัปเดตการแสดงผล
+        function updateDisplay() {
+            document.getElementById('money').textContent = gameState.money + '฿';
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('completed').textContent = gameState.completedOrders;
+            
+            const minutes = Math.floor(gameState.time / 60);
+            const seconds = gameState.time % 60;
+            document.getElementById('time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // อัปเดตวัตถุดิบ
+            document.getElementById('shrimp-count').textContent = gameState.ingredients.shrimp;
+            document.getElementById('noodles-count').textContent = gameState.ingredients.noodles;
+            document.getElementById('papaya-count').textContent = gameState.ingredients.papaya;
+            document.getElementById('mushroom-count').textContent = gameState.ingredients.mushroom;
+        }
+
+        // อัปเดตรายการออเดอร์
+        function updateOrdersDisplay() {
+            const ordersList = document.getElementById('orders-list');
+            ordersList.innerHTML = '';
+            
+            gameState.currentOrders.forEach(order => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order-item';
+                if (order.timeLeft < 20) {
+                    orderDiv.classList.add('urgent');
+                }
+                
+                orderDiv.innerHTML = `
+                    <div class="order-dish">${order.name}</div>
+                    <div class="order-price">${order.price}฿</div>
+                    <div class="order-time">เหลือเวลา: ${Math.floor(order.timeLeft)}s</div>
+                `;
+                
+                ordersList.appendChild(orderDiv);
+            });
+        }
+
+        // ตัวจับเวลา
+        function startTimer() {
+            const gameTimer = setInterval(() => {
+                gameState.time--;
+                
+                // อัปเดตเวลาออเดอร์
+                gameState.currentOrders.forEach((order, index) => {
+                    order.timeLeft--;
+                    if (order.timeLeft <= 0) {
+                        gameState.currentOrders.splice(index, 1);
+                        showNotification(`ออเดอร์ ${order.name} หมดเวลา!`);
+                    }
+                });
+                
+                updateDisplay();
+                updateOrdersDisplay();
+                
+                if (gameState.time <= 0) {
+                    clearInterval(gameTimer);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        // จบเกม
+        function endGame() {
+            gameState.gameRunning = false;
+            showNotification(`เกมจบแล้ว! คะแนนรวม: ${gameState.score} เงินรวม: ${gameState.money}฿`);
+        }
+
+        // แสดงการแจ้งเตือน
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // เริ่มเกมเมื่อโหลดหน้าเว็บ
+        window.onload = function() {
+            startGame();
+        };
+    </script>
+</body>
+</html>
